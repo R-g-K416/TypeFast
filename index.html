@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TypeFast - Typing Speed Test</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 950px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+header h1 {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+header p {
+    color: #94a3b8;
+}
+
+/* Timer Selection */
+
+.timer-selection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.timer-selection button {
+    padding: 10px 18px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #1e293b;
+    color: white;
+    cursor: pointer;
+}
+
+.timer-selection button.active {
+    background: #38bdf8;
+    color: #082f49;
+    border-color: #38bdf8;
+}
+
+.custom-time {
+    display: flex;
+    gap: 6px;
+}
+
+.custom-time input {
+    width: 90px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+    outline: none;
+}
+
+.custom-time button {
+    background: #1e293b;
+}
+
+/* Stats */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #1e293b;
+    padding: 18px;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid #334155;
+}
+
+.stat h3 {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.stat span {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Typing Box */
+
+.typing-box {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+.text-display {
+    min-height: 180px;
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 25px;
+    font-size: 23px;
+    line-height: 1.8;
+    color: #64748b;
+    margin-bottom: 20px;
+    user-select: none;
+}
+
+.char.correct {
+    color: #22c55e;
+}
+
+.char.wrong {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.char.current {
+    border-left: 2px solid #38bdf8;
+}
+
+textarea {
+    width: 100%;
+    height: 130px;
+    resize: none;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    background: #0f172a;
+    color: white;
+    padding: 18px;
+    font-size: 18px;
+    line-height: 1.5;
+    border: 1px solid #334155;
+}
+
+textarea:focus {
+    border-color: #38bdf8;
+}
+
+/* Controls */
+
+.controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.restart-btn {
+    border: none;
+    padding: 13px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #38bdf8;
+    color: #082f49;
+}
+
+/* Result */
+
+.result {
+    display: none;
+    margin-top: 20px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 25px;
+    text-align: center;
+}
+
+.result h2 {
+    margin-bottom: 20px;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.result-item {
+    background: #0f172a;
+    padding: 18px;
+    border-radius: 10px;
+}
+
+.result-item p {
+    color: #94a3b8;
+    margin-bottom: 7px;
+}
+
+.result-item strong {
+    font-size: 25px;
+}
+
+/* Mobile */
+
+@media (max-width: 650px) {
+
+    header h1 {
+        font-size: 32px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .text-display {
+        font-size: 18px;
+        padding: 18px;
+    }
+
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>⌨️ TypeFast</h1>
+    <p>Test and improve your typing speed</p>
+</header>
+
+
+<!-- Timer Selection -->
+
+<div class="timer-selection">
+
+    <button class="time-btn" data-time="15">15s</button>
+
+    <button class="time-btn active" data-time="30">30s</button>
+
+    <button class="time-btn" data-time="60">60s</button>
+
+    <button class="time-btn" data-time="120">120s</button>
+
+    <div class="custom-time">
+        <input
+            type="number"
+            id="customInput"
+            placeholder="Seconds"
+            min="5"
+            max="3600"
+        >
+
+        <button id="customBtn">Custom</button>
+    </div>
+
+</div>
+
+
+<!-- Stats -->
+
+<div class="stats">
+
+    <div class="stat">
+        <h3>TIME</h3>
+        <span id="time">30</span>
+    </div>
+
+    <div class="stat">
+        <h3>WPM</h3>
+        <span id="wpm">0</span>
+    </div>
+
+    <div class="stat">
+        <h3>ACCURACY</h3>
+        <span id="accuracy">100%</span>
+    </div>
+
+    <div class="stat">
+        <h3>ERRORS</h3>
+        <span id="errors">0</span>
+    </div>
+
+</div>
+
+
+<!-- Typing Area -->
+
+<div class="typing-box">
+
+    <div id="textDisplay" class="text-display"></div>
+
+    <textarea
+        id="typingInput"
+        placeholder="Start typing here..."
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off">
+    </textarea>
+
+    <div class="controls">
+        <button class="restart-btn" id="restartBtn">
+            Restart Test
+        </button>
+    </div>
+
+</div>
+
+
+<!-- Result -->
+
+<div class="result" id="result">
+
+    <h2>🎉 Test Complete!</h2>
+
+    <div class="result-grid">
+
+        <div class="result-item">
+            <p>WPM</p>
+            <strong id="finalWpm">0</strong>
+        </div>
+
+        <div class="result-item">
+            <p>Accuracy</p>
+            <strong id="finalAccuracy">0%</strong>
+        </div>
+
+        <div class="result-item">
+            <p>Errors</p>
+            <strong id="finalErrors">0</strong>
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const passages = [
+
+"The quick brown fox jumps over the lazy dog. Learning to type faster requires regular practice and patience.",
+
+"Programming is a skill that becomes easier with practice. Write clean code, solve problems, and keep learning.",
+
+"Success does not come overnight. Small improvements every day can create amazing results over time.",
+
+"Technology is changing the world every day. Developers build powerful applications that help people solve problems.",
+
+"Practice makes progress. The more you type without looking at the keyboard, the faster and more accurate you become."
+
+];
+
+
+const textDisplay = document.getElementById("textDisplay");
+
+const typingInput = document.getElementById("typingInput");
+
+const timeElement = document.getElementById("time");
+
+const wpmElement = document.getElementById("wpm");
+
+const accuracyElement = document.getElementById("accuracy");
+
+const errorsElement = document.getElementById("errors");
+
+const restartBtn = document.getElementById("restartBtn");
+
+const result = document.getElementById("result");
+
+const finalWpm = document.getElementById("finalWpm");
+
+const finalAccuracy = document.getElementById("finalAccuracy");
+
+const finalErrors = document.getElementById("finalErrors");
+
+const timeButtons = document.querySelectorAll(".time-btn");
+
+const customInput = document.getElementById("customInput");
+
+const customBtn = document.getElementById("customBtn");
+
+
+let currentText = "";
+
+let selectedTime = 30;
+
+let timeLeft = 30;
+
+let timer = null;
+
+let started = false;
+
+let correctCharacters = 0;
+
+let totalCharacters = 0;
+
+let errors = 0;
+
+
+/* Generate random passage */
+
+function generateText() {
+
+    const randomIndex =
+        Math.floor(Math.random() * passages.length);
+
+    currentText = passages[randomIndex];
+
+    textDisplay.innerHTML = "";
+
+    currentText.split("").forEach((char, index) => {
+
+        const span = document.createElement("span");
+
+        span.textContent = char;
+
+        span.classList.add("char");
+
+        if (index === 0) {
+            span.classList.add("current");
+        }
+
+        textDisplay.appendChild(span);
+
+    });
+}
+
+
+/* Select predefined timer */
+
+timeButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        if (started) return;
+
+        timeButtons.forEach(btn =>
+            btn.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        selectedTime =
+            Number(button.dataset.time);
+
+        restartTest();
+
+    });
+
+});
+
+
+/* Custom timer */
+
+customBtn.addEventListener("click", () => {
+
+    if (started) return;
+
+    const customTime = Number(customInput.value);
+
+    if (
+        !customTime ||
+        customTime < 5 ||
+        customTime > 3600
+    ) {
+        alert("Please enter a time between 5 and 3600 seconds.");
+        return;
+    }
+
+    timeButtons.forEach(btn =>
+        btn.classList.remove("active")
+    );
+
+    selectedTime = customTime;
+
+    restartTest();
+
+});
+
+
+/* Start timer */
+
+function startTimer() {
+
+    if (started) return;
+
+    started = true;
+
+    timer = setInterval(() => {
+
+        timeLeft--;
+
+        timeElement.textContent = timeLeft;
+
+        updateStats();
+
+        if (timeLeft <= 0) {
+            finishTest();
+        }
+
+    }, 1000);
+
+}
+
+
+/* Typing */
+
+typingInput.addEventListener("input", () => {
+
+    if (!started) {
+        startTimer();
+    }
+
+    const typedText = typingInput.value;
+
+    const chars =
+        textDisplay.querySelectorAll(".char");
+
+    correctCharacters = 0;
+
+    errors = 0;
+
+
+    chars.forEach((char, index) => {
+
+        char.classList.remove("correct");
+
+        char.classList.remove("wrong");
+
+        char.classList.remove("current");
+
+
+        if (index < typedText.length) {
+
+            if (
+                typedText[index] ===
+                currentText[index]
+            ) {
+
+                char.classList.add("correct");
+
+                correctCharacters++;
+
+            } else {
+
+                char.classList.add("wrong");
+
+                errors++;
+            }
+        }
+
+
+        if (index === typedText.length) {
+            char.classList.add("current");
+        }
+
+    });
+
+
+    totalCharacters = typedText.length;
+
+    updateStats();
+
+
+    if (
+        typedText.length >=
+        currentText.length
+    ) {
+        finishTest();
+    }
+
+});
+
+
+/* Calculate statistics */
+
+function updateStats() {
+
+    const elapsedTime =
+        selectedTime - timeLeft;
+
+    if (elapsedTime <= 0) {
+
+        wpmElement.textContent = "0";
+
+        return;
+    }
+
+
+    const minutes =
+        elapsedTime / 60;
+
+    const words =
+        correctCharacters / 5;
+
+    const wpm =
+        Math.round(words / minutes);
+
+
+    const accuracy =
+        totalCharacters === 0
+            ? 100
+            : Math.round(
+                (correctCharacters /
+                totalCharacters) * 100
+            );
+
+
+    wpmElement.textContent = wpm;
+
+    accuracyElement.textContent =
+        accuracy + "%";
+
+    errorsElement.textContent =
+        errors;
+}
+
+
+/* Finish test */
+
+function finishTest() {
+
+    clearInterval(timer);
+
+    timer = null;
+
+    started = false;
+
+    typingInput.disabled = true;
+
+
+    const elapsedTime =
+        Math.max(1, selectedTime - timeLeft);
+
+    const minutes =
+        elapsedTime / 60;
+
+
+    const wpm =
+        Math.round(
+            (correctCharacters / 5) /
+            minutes
+        );
+
+
+    const accuracy =
+        totalCharacters === 0
+            ? 100
+            : Math.round(
+                (correctCharacters /
+                totalCharacters) * 100
+            );
+
+
+    finalWpm.textContent = wpm;
+
+    finalAccuracy.textContent =
+        accuracy + "%";
+
+    finalErrors.textContent =
+        errors;
+
+    result.style.display = "block";
+}
+
+
+/* Restart */
+
+restartBtn.addEventListener(
+    "click",
+    restartTest
+);
+
+
+function restartTest() {
+
+    clearInterval(timer);
+
+    timer = null;
+
+    started = false;
+
+    timeLeft = selectedTime;
+
+    correctCharacters = 0;
+
+    totalCharacters = 0;
+
+    errors = 0;
+
+
+    timeElement.textContent =
+        selectedTime;
+
+    wpmElement.textContent =
+        "0";
+
+    accuracyElement.textContent =
+        "100%";
+
+    errorsElement.textContent =
+        "0";
+
+
+    typingInput.value = "";
+
+    typingInput.disabled = false;
+
+    result.style.display = "none";
+
+
+    generateText();
+
+    typingInput.focus();
+}
+
+
+/* Initial setup */
+
+generateText();
+
+typingInput.focus();
+
+</script>
+
+</body>
+</html>
