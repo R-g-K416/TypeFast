@@ -167,6 +167,33 @@ body.dark .card span {
 body.dark .ubtn > span {
     filter: brightness(1.15);
 }  
+
+/* FIX DONE / START / LOCKED BADGES IN DARK MODE */
+
+body.dark .card span {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #475569 !important;
+}
+
+/* Done */
+body.dark .card span[style*="#dcfce7"] {
+    background: #166534 !important;
+    color: #ffffff !important;
+    border-color: #22c55e !important;
+}
+
+/* Start */
+body.dark .card span[style*="#f1f5f9"] {
+    background: #334155 !important;
+    color: #ffffff !important;
+    border-color: #64748b !important;
+}
+
+/* Lesson icons */
+body.dark .card > div:first-child {
+    filter: brightness(1.15);
+}
   
 </style>
 </head>
