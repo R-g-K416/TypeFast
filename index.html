@@ -133,6 +133,40 @@ body.dark .ohead button {
 body.dark #gameBox {
   border-color: #475569;
 }
+
+/* UNIT COLORS - DARK MODE */
+
+body.dark .ubtn {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+body.dark .ubtn.active {
+    background: #312e81 !important;
+    color: #ffffff !important;
+    border-color: #818cf8 !important;
+}
+
+/* Unit lesson count badge */
+body.dark .ubtn small {
+    filter: brightness(0.85);
+    color: #ffffff !important;
+}
+
+/* Lesson cards use the selected unit's accent color */
+body.dark .card > div:first-child {
+    filter: brightness(1.2);
+}
+
+body.dark .card span {
+    border-color: #475569 !important;
+}
+
+/* Keep unit icons and accent colors visible */
+body.dark .ubtn > span {
+    filter: brightness(1.15);
+}  
   
 </style>
 </head>
@@ -262,7 +296,53 @@ function saveProgress(){safeSave({unlock:UNLOCK,coins:COINS,best:BEST,dark:DARK,
 function countUnlocked(a){if(!a)return 0;var n=0;for(var i=0;i<a.length;i++)if(a[i])n++;return n;}
 function gen(n){var t=[];for(var i=0;i<n;i++)t.push(WORDS[Math.floor(Math.random()*WORDS.length)]);return t.join(' ');}
 function toggleDark(){DARK=!DARK;document.body.classList.toggle('dark',DARK);saveProgress();}
-function toggleSound(){}
+
+ var SOUND_ON = true;
+var audioCtx = null;
+
+function toggleSound() {
+    SOUND_ON = !SOUND_ON;
+
+    var btn = document.querySelector('.iconBtn[onclick="toggleSound()"]');
+    if (btn) {
+        btn.textContent = SOUND_ON ? '🔊' : '🔇';
+        btn.title = SOUND_ON ? 'Mute sound' : 'Unmute sound';
+    }
+
+    if (SOUND_ON) {
+        playSound(600, 0.12);
+    }
+}
+
+function playSound(freq = 600, duration = 0.08) {
+    if (!SOUND_ON) return;
+
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        var oscillator = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = freq;
+        gain.gain.value = 0.08;
+
+        oscillator.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+        console.error('Audio error:', e);
+    }
+}
+  
 function setTab(t){TAB=t;document.getElementById('bCourse').classList.toggle('active',t==='course');document.getElementById('bLab').classList.toggle('active',t==='lab');if(t==='course')renderCourse();else renderLab();}
 function changeMode(v){MODE=v;document.getElementById('modeSel').value=v;document.getElementById('gameOpts').style.display=(v==='game')?'flex':'none';if(document.getElementById('over').style.display==='flex'){buildGame();render();}renderCourse();}
 function changeGame(v){GAME=v;document.getElementById('gameType').value=v;if(document.getElementById('over').style.display==='flex'){buildGame();render();}}
@@ -336,6 +416,11 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Backspace'){if(POS>0){POS--;STAT.pop();COMBO=Math.max(0,COMBO-1);if(MODE==='game'&&GAME==='cat'&&PIDX>0){PIDX--;if(CAM>0)CAM=Math.max(0,CAM-70);}}render();e.preventDefault();return;}
   if(e.ctrlKey||e.altKey||e.metaKey)return;if(e.key.length!==1&&e.key!==' '){e.preventDefault();return;}
   var exp=TXT[POS];
+  if (e.key === exp) {
+    playSound(700, 0.05); // Correct key
+} else if (e.key.length === 1) {
+    playSound(180, 0.1); // Wrong key
+}
   if(e.key===exp){STAT[POS]=true;COR++;COMBO++;COINS++;document.getElementById('coinTxt').textContent=COINS;
     if(MODE==='game'){
       if(GAME==='cat')PIDX=Math.min(PIDX+1,PLATS.length-1);
