@@ -398,11 +398,6 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Backspace'){if(POS>0){POS--;STAT.pop();COMBO=Math.max(0,COMBO-1);if(MODE==='game'&&GAME==='cat'&&PIDX>0){PIDX--;if(CAM>0)CAM=Math.max(0,CAM-70);}}render();e.preventDefault();return;}
   if(e.ctrlKey||e.altKey||e.metaKey)return;if(e.key.length!==1&&e.key!==' '){e.preventDefault();return;}
   var exp=TXT[POS];
-  if (e.key === exp) {
-    playSound(700, 0.05); // Correct key
-} else if (e.key.length === 1) {
-    playSound(180, 0.1); // Wrong key
-}
   if(e.key===exp){STAT[POS]=true;COR++;COMBO++;COINS++;document.getElementById('coinTxt').textContent=COINS;
     if(MODE==='game'){
       if(GAME==='cat')PIDX=Math.min(PIDX+1,PLATS.length-1);
