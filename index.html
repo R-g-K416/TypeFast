@@ -223,7 +223,6 @@ body.dark .card > div:first-child {
 </span>
 </div>
 <div style="display:flex;gap:6px;align-items:center">
-<span class="iconBtn" onclick="toggleSound()">🔊</span>
 <span class="iconBtn" onclick="toggleDark()">🌙</span>
 <span style="font-weight:800;font-size:12px" id="coinTxt">0</span>
 </div>
@@ -326,50 +325,6 @@ function toggleDark(){DARK=!DARK;document.body.classList.toggle('dark',DARK);sav
 
  var SOUND_ON = true;
 var audioCtx = null;
-
-function toggleSound() {
-    SOUND_ON = !SOUND_ON;
-
-    var btn = document.querySelector('.iconBtn[onclick="toggleSound()"]');
-    if (btn) {
-        btn.textContent = SOUND_ON ? '🔊' : '🔇';
-        btn.title = SOUND_ON ? 'Mute sound' : 'Unmute sound';
-    }
-
-    if (SOUND_ON) {
-        playSound(600, 0.12);
-    }
-}
-
-function playSound(freq = 600, duration = 0.08) {
-    if (!SOUND_ON) return;
-
-    try {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        var oscillator = audioCtx.createOscillator();
-        var gain = audioCtx.createGain();
-
-        oscillator.type = 'sine';
-        oscillator.frequency.value = freq;
-        gain.gain.value = 0.08;
-
-        oscillator.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-        console.error('Audio error:', e);
-    }
-}
-  
 function setTab(t){TAB=t;document.getElementById('bCourse').classList.toggle('active',t==='course');document.getElementById('bLab').classList.toggle('active',t==='lab');if(t==='course')renderCourse();else renderLab();}
 function changeMode(v){MODE=v;document.getElementById('modeSel').value=v;document.getElementById('gameOpts').style.display=(v==='game')?'flex':'none';if(document.getElementById('over').style.display==='flex'){buildGame();render();}renderCourse();}
 function changeGame(v){GAME=v;document.getElementById('gameType').value=v;if(document.getElementById('over').style.display==='flex'){buildGame();render();}}
