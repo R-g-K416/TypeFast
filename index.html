@@ -416,7 +416,15 @@ document.addEventListener('keydown',function(e){
     var a=getAcc(),w=getWpm();if(w>BEST)BEST=w;
     if(a>=80){if(!UNLOCK[CI])UNLOCK[CI]=[];if(LI+1<DATA[CI].lessons.length){UNLOCK[CI][LI+1]=true;}else{if(CI+1<DATA.length){if(!UNLOCK[CI+1])UNLOCK[CI+1]=[];UNLOCK[CI+1][0]=true;}}}
     saveProgress();
-    setTimeout(function(){alert(a>=80?'Done! WPM:'+w+' Acc:'+a+'%':'Need 80% - You: '+a+'%');closeOver();},150);
+    
+setTimeout(function(){
+    alert(a >= 80
+        ? 'Done! WPM:' + w + ' Acc:' + a + '%'
+        : 'Need 80% - You: ' + a + '%'
+    );
+    closeOver();
+}, 150);
+
   }
   e.preventDefault();
 });
