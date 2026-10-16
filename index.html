@@ -306,8 +306,44 @@ var LAB=[
 {icon:"🏎️",title:"Car Race",desc:"Turbo race",time:"Race",type:"car",bg:"#fde68a"},
 {icon:"🐱",title:"Cat Jump",desc:"Jump & collect",time:"Jump",type:"cat",bg:"#fbcfe8"}
 ];
-var MODE='simple',GAME='cat',LEVEL=1,TAB='course',CI=0,LI=0,POS=0,COR=0,WRO=0,STAT=[],START=0,COINS=0,UNLOCK=[],TIMER=null,COMBO=0,TXT="",BEST=0,PLATS=[],PIDX=0,CAM=0,ZOMBIES=[],ZINT=null,DARK=false,LESSON_FINISHED=false,LAB_DURATION=0;
+var MODE='simple',GAME='cat',LEVEL=1,TAB='course',CI=0,LI=0,POS=0,COR=0,WRO=0,STAT=[],START=0,COINS=0,UNLOCK=[],TIMER=null,COMBO=0,TXT="",BEST=0,PLATS=[],PIDX=0,CAM=0,ZOMBIES=[],ZINT=null,DARK=false,LESSON_FINISHED=false,LAB_DURATION=0,LAB_SESSION_ACTIVE=false,LAB_PREVIOUS_MODE='simple',LAB_PREVIOUS_GAME='cat',ZOMBIE_TOUCHES=0,ZOMBIE_NEXT_X=300;
 var STORAGE_KEY='tm_40_lessons_v1';
+
+// Story Mode keeps a shuffled queue so stories do not repeat until the full set is used.
+var STORY_QUEUE_KEY='tm_story_queue_v2';
+var STORY_LAST_KEY='tm_story_last_v2';
+var STORY_BANK=[
+  "Every Saturday morning, Anaya visited the small library near the bus station. The building was old, but sunlight came through its tall windows and made the reading tables feel warm. One day, she found a handwritten note inside a book about astronomy. The note described how its writer had watched a meteor shower from a rooftop many years earlier. Anaya became curious about the person who had written it, so she asked the librarian whether the book had been donated. The librarian remembered an elderly teacher who often brought books to the library. Anaya wrote a reply and left it between the pages. A week later, she found another note waiting for her. The two strangers began exchanging recommendations, and Anaya discovered that a quiet room could connect people who had never met.",
+  "When the first rain of the season arrived, Ravi took his old bicycle out of the storage room. He had planned to ride to the market, but the streets were shiny with water and the clouds looked heavy. Instead, he followed a narrow road beside the canal, moving slowly past gardens and small houses. Near a bridge, he noticed a delivery worker trying to protect a box from the rain. Ravi stopped and offered the worker a spare waterproof cover he carried in his bag. They secured the package and waited beneath a shop awning until the shower softened. Ravi reached home later than expected, yet he felt pleased with the afternoon. The ride reminded him that a plan did not always need to go perfectly for the day to be worthwhile.",
+  "Meera joined the college robotics club because she wanted to learn how machines could solve practical problems. At the first meeting, the team struggled to make a small robot follow a straight line. They changed the wheels, adjusted the sensors, and tested the code again and again, but the robot kept turning toward the wall. Meera suggested recording each attempt instead of changing several things at once. The team began testing one adjustment at a time and writing down the result. Soon they found that one sensor was mounted at the wrong angle. After correcting it, the robot followed the track smoothly. The project taught Meera that patient observation was often more useful than hurried guessing, and the team used the same method for every challenge that followed.",
+  "At sunrise, Kabir walked to the community garden with a notebook and a packet of seeds. The garden had been created by local residents who wanted fresh vegetables and a greener place for children to play. Some plants were growing well, but a row of young seedlings looked weak. Kabir asked the other volunteers about the watering schedule and learned that this row received too much afternoon sun. They moved a simple shade screen and checked the soil each morning. After a few days, the leaves looked stronger. The volunteers celebrated by sharing tea and planning what to plant next. Kabir returned home with muddy shoes and several new ideas. He understood that a healthy garden depended not on one big effort, but on many small acts of care repeated at the right time.",
+  "Nisha was nervous about giving her first presentation to the class. She had prepared slides full of information and practiced every sentence late into the night. During rehearsal, however, she noticed that her audience could not follow the ideas because each slide contained too much text. Her friend suggested choosing three main points and explaining them with one clear example each. Nisha shortened the slides, added a simple diagram, and practiced speaking without reading every line. On presentation day, she still felt nervous, but she could look up and speak naturally. Her classmates asked thoughtful questions, and the teacher praised her clear explanation. Nisha learned that good preparation was not about fitting every fact onto a slide; it was about helping other people understand the most important ideas.",
+  "A little repair shop stood at the end of a busy street, between a bakery and a store selling stationery. The owner, Mr. Das, repaired clocks, lamps, radios, and other objects that people often threw away. One afternoon, a student brought him a desk lamp that had stopped working before an important exam week. Mr. Das examined the wire and discovered that the problem was a loose connection rather than a broken lamp. He repaired it quickly and showed the student how to check the plug safely next time. The student thanked him and asked why he kept fixing old things when new ones were easy to buy. Mr. Das smiled and said that understanding a problem could save resources and teach patience. The student left carrying the lamp and a new respect for practical skills.",
+  "During a school trip to the hills, the students were asked to observe the landscape rather than hurry toward the viewpoint. Their guide pointed out tiny flowers growing between rocks, marks left by flowing water, and layers visible along the side of a path. At first, some students thought the activity was slow, but soon they began noticing details they would otherwise have missed. One student sketched the shape of a cloud, while another recorded the different sounds of birds. At the end of the walk, the guide asked everyone to share one discovery. The answers were varied and surprising. The class returned with fewer photographs than expected, but with a better understanding of how careful attention reveals patterns in the natural world.",
+  "Arjun wanted to improve his typing speed, so he decided to practice for a short time every evening. On the first day, he focused only on moving his fingers quickly and made many mistakes. The next day, he slowed down and tried to keep a steady rhythm. He also learned to relax his hands and look at the text instead of searching for every key. After a week, his accuracy improved, and his speed began to increase naturally. Whenever he hit a difficult sentence, he repeated it until the movement felt familiar. He kept a simple record of his results so he could notice gradual progress. Arjun learned that useful practice was not a race against the clock; it was a habit built through attention, consistency, and honest feedback.",
+  "The town's train station had a large clock that was five minutes slow. For weeks, passengers complained about it, yet nobody knew who was responsible for maintaining it. One morning, a retired engineer named Leela noticed that the clock stopped whenever the wind was strong. She asked permission to inspect the mechanism and found that a small panel had become loose. With help from the station manager, she secured the panel and checked the clock over several days. When it kept accurate time, the manager placed a small sign thanking her for the repair. Leela did not expect praise; she simply liked solving practical puzzles. Still, she was glad that a small observation had made the station easier for everyone to use.",
+  "On a quiet afternoon, Dev visited his grandfather to learn how to cook a family recipe. His grandfather did not measure every ingredient with a scale. Instead, he explained how the smell of toasted spices and the sound of simmering vegetables helped him decide what to do next. Dev tried to follow the instructions but added too much water at first. They adjusted the heat and allowed the sauce to reduce slowly. While they waited, his grandfather told stories about learning the dish from his own mother. When they finally ate, the meal tasted different from the version Dev remembered, but it was delicious. He realized that learning a skill involved both following instructions and understanding the reasons behind them, so he wrote down the steps and the little clues that mattered.",
+  "A group of neighbours decided to make their lane safer for children walking to school. They began by observing traffic for a few mornings and noting where drivers turned too quickly. Rather than arguing with one another, they collected their observations and discussed them with the local council. The council agreed to repaint a faded crossing and place a sign near the corner. Parents also took turns helping younger children cross during the first week. The changes were modest, yet drivers slowed down and families felt more comfortable. The neighbours learned that community projects became easier when people shared clear information, listened to different concerns, and chose practical steps they could complete together.",
+  "Ira had always wanted to learn photography, but she believed that a good camera was the most important part of the process. For her first project, she borrowed a simple camera and photographed ordinary things around her home: a cup beside a window, shadows on a wall, and rain drops on a plant. She experimented with distance and light, taking several pictures of the same object. When she reviewed them, she noticed that the clearest images came from moments when she had slowed down and considered what she wanted to show. She began carrying the camera during daily walks and kept notes about each attempt. Over time, Ira developed a style of her own and discovered that curiosity, patience, and observation mattered more than expensive equipment."
+];
+function nextStory(){
+  var queue=[],last=-1;
+  try{
+    var saved=JSON.parse(localStorage.getItem(STORY_QUEUE_KEY)||'null');
+    if(Array.isArray(saved))queue=saved.filter(function(id,i,a){return Number.isInteger(id)&&id>=0&&id<STORY_BANK.length&&a.indexOf(id)===i;});
+    var savedLast=parseInt(localStorage.getItem(STORY_LAST_KEY),10);
+    if(Number.isInteger(savedLast)&&savedLast>=0&&savedLast<STORY_BANK.length)last=savedLast;
+  }catch(e){queue=[];last=-1;}
+  if(queue.length===0){
+    queue=[];
+    for(var i=0;i<STORY_BANK.length;i++)queue.push(i);
+    for(var j=queue.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1));var tmp=queue[j];queue[j]=queue[k];queue[k]=tmp;}
+    if(queue.length>1&&queue[0]===last){var swap=queue.findIndex(function(id){return id!==last;});if(swap>0){var temp=queue[0];queue[0]=queue[swap];queue[swap]=temp;}}
+  }
+  var chosen=queue.shift();
+  try{localStorage.setItem(STORY_QUEUE_KEY,JSON.stringify(queue));localStorage.setItem(STORY_LAST_KEY,String(chosen));}catch(e){}
+  return STORY_BANK[chosen];
+}
 function safeLoad(){try{var r=localStorage.getItem(STORAGE_KEY);if(!r)return null;return JSON.parse(r);}catch(e){return null;}}
 function safeSave(o){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}catch(e){}}
 function initStorage(){
@@ -334,6 +370,26 @@ function toggleDark(){DARK=!DARK;document.body.classList.toggle('dark',DARK);upd
  var SOUND_ON = true;
 var audioCtx = null;
 function setTab(t){TAB=t;document.getElementById('bCourse').classList.toggle('active',t==='course');document.getElementById('bLab').classList.toggle('active',t==='lab');if(t==='course')renderCourse();else renderLab();}
+function syncModeControls(){
+  document.getElementById('modeSel').value=MODE;
+  document.getElementById('gameOpts').style.display=MODE==='game'?'flex':'none';
+  document.getElementById('gameType').value=GAME;
+}
+function beginLabSession(t){
+  LAB_PREVIOUS_MODE=MODE;
+  LAB_PREVIOUS_GAME=GAME;
+  LAB_SESSION_ACTIVE=true;
+  MODE=(t==='zombie'||t==='car'||t==='cat')?'game':'simple';
+  if(t==='zombie'||t==='car'||t==='cat')GAME=t;
+  syncModeControls();
+}
+function restoreLabMode(){
+  if(!LAB_SESSION_ACTIVE)return;
+  MODE=LAB_PREVIOUS_MODE;
+  GAME=LAB_PREVIOUS_GAME;
+  LAB_SESSION_ACTIVE=false;
+  syncModeControls();
+}
 function changeMode(v){MODE=v;document.getElementById('modeSel').value=v;document.getElementById('gameOpts').style.display=(v==='game')?'flex':'none';if(document.getElementById('over').style.display==='flex'){buildGame();render();}renderCourse();}
 function changeGame(v){GAME=v;document.getElementById('gameType').value=v;if(document.getElementById('over').style.display==='flex'){buildGame();render();}}
 function changeLevel(v){LEVEL=parseInt(v);document.getElementById('levelSel').value=v;saveProgress();if(document.getElementById('over').style.display==='flex'){buildGame();render();}if(TAB==='lab')renderLab();}
@@ -367,10 +423,20 @@ function renderLab(){
     (function(t){card.onclick=function(){openRand(t);};})(lb.type);g.appendChild(card);
   }
 }
-function openFix(ci,li){if(!(UNLOCK[ci]&&UNLOCK[ci][li])){alert('Locked! Complete previous.');return;}LAB_DURATION=0;TXT=DATA[ci].lessons[li].text;CI=ci;LI=li;startOver((li+1)+'. '+DATA[ci].lessons[li].name);}
-function openRand(t){LAB_DURATION=t==='speed1'?60:(t==='speed5'?300:0);if(t==='words')TXT=gen(28);else if(t==='story')TXT="Every morning, Maya walked through the quiet park on her way to college. The trees moved gently in the breeze, and small birds sang from the branches. She liked arriving a little early because the peaceful path helped her clear her mind before a busy day. One morning, she noticed a notebook lying beside a bench. She picked it up and found a student's name written on the first page. Instead of leaving it there, she took it to the campus office so its owner could find it. Later that afternoon, a grateful student came to thank her. Maya realized that even a small act of kindness can make someone's day better. From then on, she tried to notice little opportunities to help others whenever she could, because good choices often begin with paying attention.";else if(t==='speed1')TXT=gen(100);else if(t==='speed5')TXT=gen(300);else if(t==='zombie'){TXT=gen(30);changeMode('game');changeGame('zombie');}else if(t==='car'){TXT=gen(36);changeMode('game');changeGame('car');}else if(t==='cat'){TXT=gen(36);changeMode('game');changeGame('cat');}startOver('Lab '+t);}
-function startOver(title){LESSON_FINISHED=false;POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];clearInterval(TIMER);clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('textBox').scrollTop=0;document.getElementById('otitle').textContent=title;document.getElementById('stime').textContent=LAB_DURATION===60?'01:00':(LAB_DURATION===300?'05:00':'00:00');document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
-function closeOver(){document.getElementById('over').style.display='none';clearInterval(TIMER);clearInterval(ZINT);if(TAB==='course')renderCourse();else renderLab();}
+function openFix(ci,li){if(!(UNLOCK[ci]&&UNLOCK[ci][li])){alert('Locked! Complete previous.');return;}restoreLabMode();LAB_DURATION=0;TXT=DATA[ci].lessons[li].text;CI=ci;LI=li;startOver((li+1)+'. '+DATA[ci].lessons[li].name);}
+function openRand(t){
+  beginLabSession(t);
+  LAB_DURATION=t==='speed1'?60:(t==='speed5'?300:0);
+  if(t==='words')TXT=gen(28);
+  else if(t==='story')TXT=nextStory();
+  else if(t==='speed1')TXT=gen(100);
+  else if(t==='speed5')TXT=gen(300);
+  else if(t==='zombie')TXT=gen(30);
+  else if(t==='car'||t==='cat')TXT=gen(36);
+  startOver('Lab '+t);
+}
+function startOver(title){LESSON_FINISHED=false;POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];ZOMBIE_TOUCHES=0;ZOMBIE_NEXT_X=300;clearInterval(TIMER);clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('textBox').scrollTop=0;document.getElementById('otitle').textContent=title;document.getElementById('stime').textContent=LAB_DURATION===60?'01:00':(LAB_DURATION===300?'05:00':'00:00');document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
+function closeOver(){var gameOver=document.getElementById('zombieGameOver');if(gameOver)gameOver.remove();document.getElementById('over').style.display='none';clearInterval(TIMER);clearInterval(ZINT);restoreLabMode();if(TAB==='course')renderCourse();else renderLab();}
 function render(){
   var d=document.getElementById('textBox');
   var previousScrollTop=d.scrollTop;
@@ -408,7 +474,10 @@ function render(){
 }
 function buildKbd(){var k=document.getElementById('kbd');k.innerHTML='';var rows=["qwertyuiop","asdfghjkl","zxcvbnm"];for(var r=0;r<rows.length;r++)for(var c=0;c<rows[r].length;c++){var el=document.createElement('div');el.className='key';el.dataset.k=rows[r][c];el.textContent=rows[r][c];k.appendChild(el);}var sp=document.createElement('div');sp.className='key sp';sp.dataset.k=' ';sp.textContent='SPACE';k.appendChild(sp);}
 function buildGame(){
-  if(MODE!=='game')return;var a=document.getElementById('gameBox');a.innerHTML='';
+  clearInterval(ZINT);ZINT=null;
+  var a=document.getElementById('gameBox');
+  if(MODE!=='game'){a.innerHTML='';return;}
+  a.innerHTML='';
   var speed=LEVEL===1?0.5:LEVEL===2?0.8:LEVEL===3?1.2:LEVEL===4?1.7:2.3;
   if(GAME==='cat'){
     a.style.background='linear-gradient(180deg,#60a5fa 0%,#93c5fd 32%,#fef3c7 32%,#fde68a 100%)';
@@ -420,9 +489,78 @@ function buildGame(){
   }else if(GAME==='zombie'){
     a.style.background='linear-gradient(180deg,#020617,#1e293b)';
     var player=document.createElement('div');player.className='player';player.id='player';player.innerHTML='<span>🧍</span><span class="gun">🔫</span>';a.appendChild(player);
-    ZOMBIES=[];var words=TXT.split(' ');for(var i=0;i<Math.min(words.length,5+LEVEL);i++){var z=document.createElement('div');z.className='zom';z.id='z'+i;z.style.left=(300+i*100)+'px';z.style.bottom='45px';z.innerHTML='🧟<div class="zword">'+words[i]+'</div>';a.appendChild(z);ZOMBIES.push({word:words[i],x:300+i*100,alive:true,id:'z'+i});}
-    ZINT=setInterval(function(){for(var i=0;i<ZOMBIES.length;i++){if(ZOMBIES[i].alive){ZOMBIES[i].x-=speed;var el=document.getElementById(ZOMBIES[i].id);if(el){el.style.left=ZOMBIES[i].x+'px';if(ZOMBIES[i].x<80){el.style.display='none';ZOMBIES[i].alive=false;}}}}},40);
+    var status=document.createElement('div');status.id='zombieStatus';status.textContent='Touches: 0 / 3';
+    status.style.cssText='position:absolute;top:8px;left:8px;z-index:20;background:#0f172a;color:#ffffff;padding:5px 9px;border-radius:6px;font-weight:800;font-size:12px;';
+    a.appendChild(status);
+    ZOMBIES=[];ZOMBIE_TOUCHES=0;ZOMBIE_NEXT_X=300;
+    spawnZombieWords(TXT.split(/\s+/),0);
+    ZINT=setInterval(function(){
+      if(LESSON_FINISHED)return;
+      for(var i=0;i<ZOMBIES.length;i++){
+        if(LESSON_FINISHED)break;
+        var zombie=ZOMBIES[i];
+        if(!zombie.alive)continue;
+        zombie.x-=speed;
+        var el=document.getElementById(zombie.id);
+        if(el)el.style.left=zombie.x+'px';
+        if(zombie.x<80)registerZombieTouch(zombie);
+      }
+    },40);
   }
+}
+function spawnZombieWords(words,startWordIndex){
+  var a=document.getElementById('gameBox');
+  for(var i=0;i<words.length;i++){
+    var word=words[i];
+    if(!word)continue;
+    var idx=startWordIndex+i;
+    var z=document.createElement('div');
+    z.className='zom';z.id='z'+idx;z.style.left=ZOMBIE_NEXT_X+'px';z.style.bottom='45px';
+    var emoji=document.createElement('span');emoji.textContent='🧟';z.appendChild(emoji);
+    var label=document.createElement('div');label.className='zword';label.textContent=word;z.appendChild(label);
+    a.appendChild(z);
+    ZOMBIES.push({word:word,wordIndex:idx,x:ZOMBIE_NEXT_X,alive:true,id:'z'+idx});
+    ZOMBIE_NEXT_X+=100;
+  }
+}
+function attackZombieWord(wordIndex,word){
+  for(var i=0;i<ZOMBIES.length;i++){
+    var zombie=ZOMBIES[i];
+    if(zombie.alive&&zombie.wordIndex===wordIndex&&zombie.word===word){
+      zombie.alive=false;
+      var el=document.getElementById(zombie.id);
+      if(el){el.textContent='💥';var zombieId=zombie.id;setTimeout(function(){var target=document.getElementById(zombieId);if(target)target.style.display='none';},350);}
+      return;
+    }
+  }
+}
+function registerZombieTouch(zombie){
+  if(!zombie.alive||LESSON_FINISHED)return;
+  zombie.alive=false;
+  var el=document.getElementById(zombie.id);if(el)el.style.display='none';
+  ZOMBIE_TOUCHES++;
+  var status=document.getElementById('zombieStatus');
+  if(status)status.textContent='Touches: '+ZOMBIE_TOUCHES+' / 3';
+  if(ZOMBIE_TOUCHES>=3)showZombieGameOver();
+}
+function showZombieGameOver(){
+  if(LESSON_FINISHED)return;
+  LESSON_FINISHED=true;
+  clearInterval(TIMER);clearInterval(ZINT);
+  var wpm=getWpm(),accuracy=getAcc();
+  if(wpm>BEST)BEST=wpm;
+  saveProgress();
+
+  // Put Game Over over the entire typing screen, not just inside the 320px game area.
+  var typingScreen=document.getElementById('over');
+  var overlay=document.createElement('div');overlay.id='zombieGameOver';
+  overlay.style.cssText='position:absolute;inset:0;width:100%;height:100%;min-height:100%;box-sizing:border-box;overflow:auto;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(2,6,23,.97);color:#ffffff;text-align:center;padding:clamp(16px,4vh,32px);';
+  var heading=document.createElement('div');heading.textContent='GAME OVER';heading.style.cssText='font-size:clamp(28px,5vw,40px);font-weight:900;';overlay.appendChild(heading);
+  var detail=document.createElement('div');detail.textContent='Zombies reached you 3 times.';detail.style.cssText='font-size:16px;font-weight:700;';overlay.appendChild(detail);
+  var score=document.createElement('div');score.textContent='WPM: '+wpm+'  |  Accuracy: '+accuracy+'%';score.style.cssText='font-size:14px;';overlay.appendChild(score);
+  var back=document.createElement('button');back.type='button';back.textContent='Back';back.style.cssText='margin-top:8px;padding:9px 20px;border-radius:8px;border:2px solid #e2e8f0;background:#ffffff;color:#0f172a;font-weight:800;cursor:pointer;';
+  back.addEventListener('click',closeOver);overlay.appendChild(back);
+  typingScreen.appendChild(overlay);
 }
 function moveGame(){
   if(GAME==='cat'){
@@ -491,17 +629,23 @@ document.addEventListener('keydown',function(e){
     if(MODE==='game'){
       if(GAME==='cat')PIDX=Math.min(PIDX+1,PLATS.length-1);
       else if(GAME==='car'){PIDX++;}
-      else if(GAME==='zombie'){
-        var lastWord=TXT.substring(0,POS+1).trim().split(' ').pop();
-        var frontIdx=-1,frontX=9999;
-        for(var i=0;i<ZOMBIES.length;i++){if(ZOMBIES[i].alive&&ZOMBIES[i].word===lastWord){if(ZOMBIES[i].x<frontX){frontX=ZOMBIES[i].x;frontIdx=i;}}}
-        if(frontIdx!==-1){var el=document.getElementById(ZOMBIES[frontIdx].id);if(el){el.textContent='💥';setTimeout(function(){var ee=document.getElementById('z'+frontIdx);if(ee)ee.style.display='none';},350);ZOMBIES[frontIdx].alive=false;}}
+      else if(GAME==='zombie'&&exp!==' '&&(POS+1===TXT.length||TXT[POS+1]===' ')){
+        var wordStart=TXT.lastIndexOf(' ',POS-1)+1;
+        var currentWord=TXT.slice(wordStart,POS+1);
+        var currentWordIndex=TXT.slice(0,POS+1).trim().split(/\s+/).length-1;
+        attackZombieWord(currentWordIndex,currentWord);
       }
     }
   }else{STAT[POS]=false;WRO++;COMBO=0;}
   POS++;render();
   if(POS>=TXT.length){
-    if(TAB==='lab'&&LAB_DURATION>0){
+    if(LAB_SESSION_ACTIVE&&GAME==='zombie'){
+      var previousWordCount=TXT.split(/\s+/).length;
+      var newWords=gen(30);
+      TXT+=' '+newWords;
+      spawnZombieWords(newWords.split(/\s+/),previousWordCount);
+      render();
+    }else if(TAB==='lab'&&LAB_DURATION>0){
       TXT+=' '+gen(LAB_DURATION===60?100:300);
       render();
     }else{
