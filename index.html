@@ -24,7 +24,7 @@
 #over{position:fixed;inset:0;background:#f1f5f9;z-index:100;display:none;flex-direction:column;overflow:auto}
 .ohead{height:56px;background:#fff;border-bottom:2px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;padding:0 12px;position:sticky;top:0}
 #gameBox{border:3px solid #e2e8f0;border-radius:14px;margin:10px;position:relative;display:none;height:320px;width:calc(100% - 20px);max-width:1000px;align-self:center;background:#87ceeb;overflow:hidden}
-#textBox{background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:16px;margin:10px;font-family:monospace;font-size:19px;line-height:2.1;min-height:110px;outline:none;white-space:pre-wrap;word-break:break-word;width:calc(100% - 20px);max-width:1000px;align-self:center}
+#textBox{background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:16px;margin:10px;font-family:monospace;font-size:19px;line-height:2.1;min-height:110px;max-height:min(42vh,420px);overflow-y:auto;outline:none;white-space:pre-wrap;word-break:break-word;width:calc(100% - 20px);max-width:1000px;align-self:center}
 .ok{background:#bbf7d0;color:#000;border-radius:4px}.bad{background:#fecaca;color:#000;border-radius:4px}.cur{background:#bfdbfe;color:#000;box-shadow:inset 0 -3px 0 #3b82f6;border-radius:4px}.rem{color:#94a3b8}
 .stats{display:flex;gap:6px;margin:8px 12px;width:calc(100% - 24px);max-width:1000px;align-self:center}
 .stats div{flex:1;background:#fff;border:2px solid #e2e8f0;border-radius:10px;padding:6px;text-align:center;font-size:12px}
@@ -368,10 +368,44 @@ function renderLab(){
   }
 }
 function openFix(ci,li){if(!(UNLOCK[ci]&&UNLOCK[ci][li])){alert('Locked! Complete previous.');return;}LAB_DURATION=0;TXT=DATA[ci].lessons[li].text;CI=ci;LI=li;startOver((li+1)+'. '+DATA[ci].lessons[li].name);}
-function openRand(t){LAB_DURATION=t==='speed1'?60:(t==='speed5'?300:0);if(t==='words')TXT=gen(28);else if(t==='story')TXT="The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.";else if(t==='speed1')TXT=gen(100);else if(t==='speed5')TXT=gen(300);else if(t==='zombie'){TXT=gen(30);changeMode('game');changeGame('zombie');}else if(t==='car'){TXT=gen(36);changeMode('game');changeGame('car');}else if(t==='cat'){TXT=gen(36);changeMode('game');changeGame('cat');}startOver('Lab '+t);}
-function startOver(title){LESSON_FINISHED=false;POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];clearInterval(TIMER);clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('otitle').textContent=title;document.getElementById('stime').textContent=LAB_DURATION===60?'01:00':(LAB_DURATION===300?'05:00':'00:00');document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
+function openRand(t){LAB_DURATION=t==='speed1'?60:(t==='speed5'?300:0);if(t==='words')TXT=gen(28);else if(t==='story')TXT="Every morning, Maya walked through the quiet park on her way to college. The trees moved gently in the breeze, and small birds sang from the branches. She liked arriving a little early because the peaceful path helped her clear her mind before a busy day. One morning, she noticed a notebook lying beside a bench. She picked it up and found a student's name written on the first page. Instead of leaving it there, she took it to the campus office so its owner could find it. Later that afternoon, a grateful student came to thank her. Maya realized that even a small act of kindness can make someone's day better. From then on, she tried to notice little opportunities to help others whenever she could, because good choices often begin with paying attention.";else if(t==='speed1')TXT=gen(100);else if(t==='speed5')TXT=gen(300);else if(t==='zombie'){TXT=gen(30);changeMode('game');changeGame('zombie');}else if(t==='car'){TXT=gen(36);changeMode('game');changeGame('car');}else if(t==='cat'){TXT=gen(36);changeMode('game');changeGame('cat');}startOver('Lab '+t);}
+function startOver(title){LESSON_FINISHED=false;POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];clearInterval(TIMER);clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('textBox').scrollTop=0;document.getElementById('otitle').textContent=title;document.getElementById('stime').textContent=LAB_DURATION===60?'01:00':(LAB_DURATION===300?'05:00':'00:00');document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
 function closeOver(){document.getElementById('over').style.display='none';clearInterval(TIMER);clearInterval(ZINT);if(TAB==='course')renderCourse();else renderLab();}
-function render(){var d=document.getElementById('textBox');d.innerHTML='';for(var i=0;i<TXT.length;i++){var s=document.createElement('span');s.textContent=TXT[i];if(i<POS)s.className=STAT[i]?'ok':'bad';else if(i===POS)s.className='cur';else s.className='rem';d.appendChild(s);}var nxt=TXT[POS]||'';var keys=document.querySelectorAll('.key');for(var k=0;k<keys.length;k++){keys[k].classList.remove('on');if(keys[k].dataset.k===nxt.toLowerCase())keys[k].classList.add('on');}document.getElementById('swpm').textContent=getWpm();document.getElementById('sacc').textContent=getAcc()+'%';document.getElementById('scombo').textContent=COMBO+'x';document.getElementById('coinTxt').textContent=COINS;if(MODE==='game')moveGame();}
+function render(){
+  var d=document.getElementById('textBox');
+  var previousScrollTop=d.scrollTop;
+  d.innerHTML='';
+  for(var i=0;i<TXT.length;i++){
+    var s=document.createElement('span');
+    s.textContent=TXT[i];
+    if(i<POS)s.className=STAT[i]?'ok':'bad';
+    else if(i===POS)s.className='cur';
+    else s.className='rem';
+    d.appendChild(s);
+  }
+  // Preserve the current view, then scroll only enough to keep the active character visible.
+  d.scrollTop=previousScrollTop;
+  var current=POS<TXT.length?d.children[POS]:null;
+  if(current){
+    var boxRect=d.getBoundingClientRect();
+    var charRect=current.getBoundingClientRect();
+    var visibleTop=boxRect.top+d.clientTop+8;
+    var visibleBottom=boxRect.bottom-d.clientTop-8;
+    if(charRect.bottom>visibleBottom)d.scrollTop+=charRect.bottom-visibleBottom;
+    else if(charRect.top<visibleTop)d.scrollTop-=visibleTop-charRect.top;
+  }
+  var nxt=TXT[POS]||'';
+  var keys=document.querySelectorAll('.key');
+  for(var k=0;k<keys.length;k++){
+    keys[k].classList.remove('on');
+    if(keys[k].dataset.k===nxt.toLowerCase())keys[k].classList.add('on');
+  }
+  document.getElementById('swpm').textContent=getWpm();
+  document.getElementById('sacc').textContent=getAcc()+'%';
+  document.getElementById('scombo').textContent=COMBO+'x';
+  document.getElementById('coinTxt').textContent=COINS;
+  if(MODE==='game')moveGame();
+}
 function buildKbd(){var k=document.getElementById('kbd');k.innerHTML='';var rows=["qwertyuiop","asdfghjkl","zxcvbnm"];for(var r=0;r<rows.length;r++)for(var c=0;c<rows[r].length;c++){var el=document.createElement('div');el.className='key';el.dataset.k=rows[r][c];el.textContent=rows[r][c];k.appendChild(el);}var sp=document.createElement('div');sp.className='key sp';sp.dataset.k=' ';sp.textContent='SPACE';k.appendChild(sp);}
 function buildGame(){
   if(MODE!=='game')return;var a=document.getElementById('gameBox');a.innerHTML='';
