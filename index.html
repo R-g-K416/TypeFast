@@ -431,7 +431,7 @@ function openRand(t){
   else if(t==='story')TXT=nextStory();
   else if(t==='speed1')TXT=gen(100);
   else if(t==='speed5')TXT=gen(300);
-  else if(t==='zombie')TXT=gen(30);
+  else if(t==='zombie')TXT=gen(180);
   else if(t==='car'||t==='cat')TXT=gen(36);
   startOver('Lab '+t);
 }
@@ -449,16 +449,33 @@ function render(){
     else s.className='rem';
     d.appendChild(s);
   }
-  // Preserve the current view, then scroll only enough to keep the active character visible.
+  // Preserve the view, but scroll by the active visual row rather than by one character.
+  // This keeps each line fully visible as the player approaches its final word.
   d.scrollTop=previousScrollTop;
   var current=POS<TXT.length?d.children[POS]:null;
   if(current){
-    var boxRect=d.getBoundingClientRect();
+    var children=d.children;
     var charRect=current.getBoundingClientRect();
+    var lineTop=charRect.top;
+    var lineBottom=charRect.bottom;
+    var i, r;
+    for(i=POS-1;i>=0;i--){
+      r=children[i].getBoundingClientRect();
+      if(Math.abs(r.top-charRect.top)>2)break;
+      lineTop=Math.min(lineTop,r.top);
+      lineBottom=Math.max(lineBottom,r.bottom);
+    }
+    for(i=POS+1;i<children.length;i++){
+      r=children[i].getBoundingClientRect();
+      if(Math.abs(r.top-charRect.top)>2)break;
+      lineTop=Math.min(lineTop,r.top);
+      lineBottom=Math.max(lineBottom,r.bottom);
+    }
+    var boxRect=d.getBoundingClientRect();
     var visibleTop=boxRect.top+d.clientTop+8;
     var visibleBottom=boxRect.bottom-d.clientTop-8;
-    if(charRect.bottom>visibleBottom)d.scrollTop+=charRect.bottom-visibleBottom;
-    else if(charRect.top<visibleTop)d.scrollTop-=visibleTop-charRect.top;
+    if(lineBottom>visibleBottom)d.scrollTop+=lineBottom-visibleBottom;
+    else if(lineTop<visibleTop)d.scrollTop-=visibleTop-lineTop;
   }
   var nxt=TXT[POS]||'';
   var keys=document.querySelectorAll('.key');
@@ -523,6 +540,20 @@ function spawnZombieWords(words,startWordIndex){
     ZOMBIE_NEXT_X+=100;
   }
 }
+// Keep a large queue ready so replenishment happens well beyond the visible lines.
+// The player sees continuous text rather than a new batch appearing at the end.
+function extendZombieTextIfNeeded(){
+  if(!LAB_SESSION_ACTIVE||GAME!=='zombie'||LESSON_FINISHED)return;
+  var remainingText=TXT.slice(POS).trim();
+  var remainingWords=remainingText?remainingText.split(/\s+/).length:0;
+  if(remainingWords>90)return;
+
+  var previousWordCount=TXT.trim().split(/\s+/).length;
+  var newWords=gen(90);
+  TXT+=' '+newWords;
+  spawnZombieWords(newWords.split(/\s+/),previousWordCount);
+}
+
 function attackZombieWord(wordIndex,word){
   for(var i=0;i<ZOMBIES.length;i++){
     var zombie=ZOMBIES[i];
@@ -637,13 +668,14 @@ document.addEventListener('keydown',function(e){
       }
     }
   }else{STAT[POS]=false;WRO++;COMBO=0;}
-  POS++;render();
+  POS++;
+  // Refill the Zombie typing queue while several words are still left.
+  // The final-word branch remains as a safety fallback for any edge case.
+  if(LAB_SESSION_ACTIVE&&GAME==='zombie')extendZombieTextIfNeeded();
+  render();
   if(POS>=TXT.length){
     if(LAB_SESSION_ACTIVE&&GAME==='zombie'){
-      var previousWordCount=TXT.split(/\s+/).length;
-      var newWords=gen(30);
-      TXT+=' '+newWords;
-      spawnZombieWords(newWords.split(/\s+/),previousWordCount);
+      extendZombieTextIfNeeded();
       render();
     }else if(TAB==='lab'&&LAB_DURATION>0){
       TXT+=' '+gen(LAB_DURATION===60?100:300);
