@@ -306,7 +306,7 @@ var LAB=[
 {icon:"🏎️",title:"Car Race",desc:"Turbo race",time:"Race",type:"car",bg:"#fde68a"},
 {icon:"🐱",title:"Cat Jump",desc:"Jump & collect",time:"Jump",type:"cat",bg:"#fbcfe8"}
 ];
-var MODE='simple',GAME='cat',LEVEL=1,TAB='course',CI=0,LI=0,POS=0,COR=0,WRO=0,STAT=[],START=0,COINS=0,UNLOCK=[],TIMER=null,COMBO=0,TXT="",BEST=0,PLATS=[],PIDX=0,CAM=0,ZOMBIES=[],ZINT=null,DARK=false;
+var MODE='simple',GAME='cat',LEVEL=1,TAB='course',CI=0,LI=0,POS=0,COR=0,WRO=0,STAT=[],START=0,COINS=0,UNLOCK=[],TIMER=null,COMBO=0,TXT="",BEST=0,PLATS=[],PIDX=0,CAM=0,ZOMBIES=[],ZINT=null,DARK=false,LESSON_FINISHED=false,LAB_DURATION=0;
 var STORAGE_KEY='tm_40_lessons_v1';
 function safeLoad(){try{var r=localStorage.getItem(STORAGE_KEY);if(!r)return null;return JSON.parse(r);}catch(e){return null;}}
 function safeSave(o){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}catch(e){}}
@@ -359,9 +359,9 @@ function renderLab(){
     (function(t){card.onclick=function(){openRand(t);};})(lb.type);g.appendChild(card);
   }
 }
-function openFix(ci,li){if(!(UNLOCK[ci]&&UNLOCK[ci][li])){alert('Locked! Complete previous.');return;}TXT=DATA[ci].lessons[li].text;CI=ci;LI=li;startOver((li+1)+'. '+DATA[ci].lessons[li].name);}
-function openRand(t){if(t==='words')TXT=gen(28);else if(t==='story')TXT="The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.";else if(t==='speed1')TXT=gen(100);else if(t==='speed5')TXT=gen(300);else if(t==='zombie'){TXT=gen(30);changeMode('game');changeGame('zombie');}else if(t==='car'){TXT=gen(36);changeMode('game');changeGame('car');}else if(t==='cat'){TXT=gen(36);changeMode('game');changeGame('cat');}startOver('Lab '+t);}
-function startOver(title){POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('otitle').textContent=title;document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
+function openFix(ci,li){if(!(UNLOCK[ci]&&UNLOCK[ci][li])){alert('Locked! Complete previous.');return;}LAB_DURATION=0;TXT=DATA[ci].lessons[li].text;CI=ci;LI=li;startOver((li+1)+'. '+DATA[ci].lessons[li].name);}
+function openRand(t){LAB_DURATION=t==='speed1'?60:(t==='speed5'?300:0);if(t==='words')TXT=gen(28);else if(t==='story')TXT="The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.";else if(t==='speed1')TXT=gen(100);else if(t==='speed5')TXT=gen(300);else if(t==='zombie'){TXT=gen(30);changeMode('game');changeGame('zombie');}else if(t==='car'){TXT=gen(36);changeMode('game');changeGame('car');}else if(t==='cat'){TXT=gen(36);changeMode('game');changeGame('cat');}startOver('Lab '+t);}
+function startOver(title){LESSON_FINISHED=false;POS=0;COR=0;WRO=0;STAT=[];START=0;COMBO=0;PLATS=[];PIDX=0;CAM=0;ZOMBIES=[];clearInterval(TIMER);clearInterval(ZINT);document.getElementById('over').style.display='flex';document.getElementById('otitle').textContent=title;document.getElementById('stime').textContent=LAB_DURATION===60?'01:00':(LAB_DURATION===300?'05:00':'00:00');document.getElementById('gameBox').style.display=(MODE==='game')?'block':'none';buildGame();buildKbd();render();startTimer();}
 function closeOver(){document.getElementById('over').style.display='none';clearInterval(TIMER);clearInterval(ZINT);if(TAB==='course')renderCourse();else renderLab();}
 function render(){var d=document.getElementById('textBox');d.innerHTML='';for(var i=0;i<TXT.length;i++){var s=document.createElement('span');s.textContent=TXT[i];if(i<POS)s.className=STAT[i]?'ok':'bad';else if(i===POS)s.className='cur';else s.className='rem';d.appendChild(s);}var nxt=TXT[POS]||'';var keys=document.querySelectorAll('.key');for(var k=0;k<keys.length;k++){keys[k].classList.remove('on');if(keys[k].dataset.k===nxt.toLowerCase())keys[k].classList.add('on');}document.getElementById('swpm').textContent=getWpm();document.getElementById('sacc').textContent=getAcc()+'%';document.getElementById('scombo').textContent=COMBO+'x';document.getElementById('coinTxt').textContent=COINS;if(MODE==='game')moveGame();}
 function buildKbd(){var k=document.getElementById('kbd');k.innerHTML='';var rows=["qwertyuiop","asdfghjkl","zxcvbnm"];for(var r=0;r<rows.length;r++)for(var c=0;c<rows[r].length;c++){var el=document.createElement('div');el.className='key';el.dataset.k=rows[r][c];el.textContent=rows[r][c];k.appendChild(el);}var sp=document.createElement('div');sp.className='key sp';sp.dataset.k=' ';sp.textContent='SPACE';k.appendChild(sp);}
@@ -391,12 +391,59 @@ function moveGame(){
 }
 function getWpm(){if(!START)return 0;var m=(Date.now()-START)/60000;if(m<0.05)return 0;return Math.round((COR/5)/m);}
 function getAcc(){var t=COR+WRO;return t?Math.round(COR/t*100):100;}
-function startTimer(){clearInterval(TIMER);TIMER=setInterval(function(){if(!START)return;var s=Math.floor((Date.now()-START)/1000);document.getElementById('stime').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},400);}
+function startTimer(){
+  clearInterval(TIMER);
+  TIMER=setInterval(function(){
+    if(!START||LESSON_FINISHED)return;
+    var elapsed=Math.floor((Date.now()-START)/1000);
+    if(LAB_DURATION>0){
+      var remaining=Math.max(0,LAB_DURATION-elapsed);
+      document.getElementById('stime').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+      if(remaining<=0)finishTyping('time');
+    }else{
+      document.getElementById('stime').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
+    }
+  },100);
+}
+function finishTyping(reason){
+  if(LESSON_FINISHED)return;
+  LESSON_FINISHED=true;
+  clearInterval(TIMER);
+  clearInterval(ZINT);
+
+  var accuracy=getAcc();
+  var wpm=getWpm();
+  if(wpm>BEST)BEST=wpm;
+
+  // Only Course lessons affect unlock progress; finishing a Lab never unlocks a lesson.
+  if(reason==='complete'&&TAB==='course'&&accuracy>=80){
+    if(!UNLOCK[CI])UNLOCK[CI]=[];
+    if(LI+1<DATA[CI].lessons.length){
+      UNLOCK[CI][LI+1]=true;
+    }else if(CI+1<DATA.length){
+      if(!UNLOCK[CI+1])UNLOCK[CI+1]=[];
+      UNLOCK[CI+1][0]=true;
+    }
+  }
+  saveProgress();
+
+  var message=reason==='time'
+    ? 'Time is up! WPM: '+wpm+' Acc: '+accuracy+'%'
+    : (accuracy>=80
+        ? 'Done! WPM: '+wpm+' Acc: '+accuracy+'%'
+        : 'Need 80% - You: '+accuracy+'%');
+
+  // Close the typing overlay before the alert; a completion guard prevents repeat alerts.
+  closeOver();
+  alert(message);
+}
+
 document.addEventListener('keydown',function(e){
-  if(document.getElementById('over').style.display!=='flex')return;
-  if(START===0)START=Date.now();
-  if(e.key==='Backspace'){if(POS>0){POS--;STAT.pop();COMBO=Math.max(0,COMBO-1);if(MODE==='game'&&GAME==='cat'&&PIDX>0){PIDX--;if(CAM>0)CAM=Math.max(0,CAM-70);}}render();e.preventDefault();return;}
+  if(document.getElementById('over').style.display!=='flex'||LESSON_FINISHED)return;
+  if(LAB_DURATION>0&&START&&Date.now()-START>=LAB_DURATION*1000){finishTyping('time');e.preventDefault();return;}
+  if(e.key==='Backspace'){if(POS>0){POS--;if(STAT[POS])COR=Math.max(0,COR-1);else WRO=Math.max(0,WRO-1);STAT.pop();COMBO=Math.max(0,COMBO-1);if(MODE==='game'&&GAME==='cat'&&PIDX>0){PIDX--;if(CAM>0)CAM=Math.max(0,CAM-70);}}render();e.preventDefault();return;}
   if(e.ctrlKey||e.altKey||e.metaKey)return;if(e.key.length!==1&&e.key!==' '){e.preventDefault();return;}
+  if(START===0)START=Date.now();
   var exp=TXT[POS];
   if(e.key===exp){STAT[POS]=true;COR++;COMBO++;COINS++;document.getElementById('coinTxt').textContent=COINS;
     if(MODE==='game'){
@@ -412,19 +459,14 @@ document.addEventListener('keydown',function(e){
   }else{STAT[POS]=false;WRO++;COMBO=0;}
   POS++;render();
   if(POS>=TXT.length){
-    clearInterval(TIMER);clearInterval(ZINT);
-    var a=getAcc(),w=getWpm();if(w>BEST)BEST=w;
-    if(a>=80){if(!UNLOCK[CI])UNLOCK[CI]=[];if(LI+1<DATA[CI].lessons.length){UNLOCK[CI][LI+1]=true;}else{if(CI+1<DATA.length){if(!UNLOCK[CI+1])UNLOCK[CI+1]=[];UNLOCK[CI+1][0]=true;}}}
-    saveProgress();
-    
-setTimeout(function(){
-    alert(a >= 80
-        ? 'Done! WPM:' + w + ' Acc:' + a + '%'
-        : 'Need 80% - You: ' + a + '%'
-    );
-    closeOver();
-}, 150);
-
+    if(TAB==='lab'&&LAB_DURATION>0){
+      TXT+=' '+gen(LAB_DURATION===60?100:300);
+      render();
+    }else{
+      finishTyping('complete');
+      e.preventDefault();
+      return;
+    }
   }
   e.preventDefault();
 });
