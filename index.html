@@ -223,8 +223,8 @@ body.dark .card > div:first-child {
 </span>
 </div>
 <div style="display:flex;gap:6px;align-items:center">
-<span class="iconBtn" onclick="toggleDark()">🌙</span>
-<span style="font-weight:800;font-size:12px" id="coinTxt">0</span>
+<span class="iconBtn" id="themeIcon" role="button" tabindex="0" title="Switch to dark mode" aria-label="Switch to dark mode" onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDark();}">🌙</span>
+<span style="font-weight:800;font-size:12px" id="pointsDisplay" title="Earn 1 point for each correct keypress">⭐ Points: <span id="coinTxt">0</span></span>
 </div>
 </div>
 <div class="layout"><div class="left" id="left"></div><div class="right" id="right"></div></div>
@@ -315,13 +315,21 @@ function initStorage(){
   if(d&&d.unlock&&d.unlock.length===DATA.length){UNLOCK=d.unlock;COINS=d.coins||0;BEST=d.best||0;DARK=!!d.dark;LEVEL=d.level||1;}
   else{UNLOCK=[];for(var i=0;i<DATA.length;i++){UNLOCK[i]=[];UNLOCK[i][0]=true;}COINS=0;BEST=0;DARK=false;LEVEL=1;safeSave({unlock:UNLOCK,coins:COINS,best:BEST,dark:DARK,level:LEVEL});}
   if(DARK)document.body.classList.add('dark');
+  updateThemeIcon();
   document.getElementById('levelSel').value=LEVEL;
   document.getElementById('coinTxt').textContent=COINS;
 }
 function saveProgress(){safeSave({unlock:UNLOCK,coins:COINS,best:BEST,dark:DARK,level:LEVEL});}
 function countUnlocked(a){if(!a)return 0;var n=0;for(var i=0;i<a.length;i++)if(a[i])n++;return n;}
 function gen(n){var t=[];for(var i=0;i<n;i++)t.push(WORDS[Math.floor(Math.random()*WORDS.length)]);return t.join(' ');}
-function toggleDark(){DARK=!DARK;document.body.classList.toggle('dark',DARK);saveProgress();}
+function updateThemeIcon(){
+  var icon=document.getElementById('themeIcon');
+  if(!icon)return;
+  icon.textContent=DARK?'☀️':'🌙';
+  icon.title=DARK?'Switch to light mode':'Switch to dark mode';
+  icon.setAttribute('aria-label',icon.title);
+}
+function toggleDark(){DARK=!DARK;document.body.classList.toggle('dark',DARK);updateThemeIcon();saveProgress();}
 
  var SOUND_ON = true;
 var audioCtx = null;
